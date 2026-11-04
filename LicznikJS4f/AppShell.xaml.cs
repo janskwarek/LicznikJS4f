@@ -1,51 +1,65 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using Font = Microsoft.Maui.Font;
+using LicznikJS4f;
+using System.Collections.ObjectModel;
 
-namespace LicznikJS4f
+namespace LicznikJS4f;
+
+public class CounterItem
 {
-    public partial class AppShell : Shell
+	public string Name { get; set; }
+	public int Value { get; set; }
+}
+public partial class CounterPage : ContentPage
+{
+	
+	public ObservableCollection<CounterItem> Counters { get; set; } = new();
+
+	public CounterPage()
+	{
+		InitializeComponent();
+		CountersCollection.ItemsSource = Counters;
+	}
+    private void Button_add_Counter(object sender, EventArgs e)
     {
-        public AppShell()
+        string name = NewCounterEntry.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(name))
         {
-            InitializeComponent();
-            var currentTheme = Application.Current!.RequestedTheme;
-            ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
+            DisplayAlert("Błąd", "Wpisz nazwę licznika.", "OK");
+			return;
         }
-        public static async Task DisplaySnackbarAsync(string message)
+		int initialValue = 0;
+        if (!string.IsNullOrWhiteSpace(InitialValueEntry.Text) &&
+            !int.TryParse(InitialValueEntry.Text, out initialValue))
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-            var snackbarOptions = new SnackbarOptions
-            {
-                BackgroundColor = Color.FromArgb("#FF3300"),
-                TextColor = Colors.White,
-                ActionButtonTextColor = Colors.Yellow,
-                CornerRadius = new CornerRadius(0),
-                Font = Font.SystemFontOfSize(18),
-                ActionButtonFont = Font.SystemFontOfSize(14)
-            };
-
-            var snackbar = Snackbar.Make(message, visualOptions: snackbarOptions);
-
-            await snackbar.Show(cancellationTokenSource.Token);
+            DisplayAlert("Błąd", "Wpisz poprawną liczbę całkowitą jako wartość początkową.", "OK");
+            return;
         }
 
-        public static async Task DisplayToastAsync(string message)
+        Counters.Add(new CounterItem { Name = name, Value = initialValue });
+        NewCounterEntry.Text = string.Empty;
+        InitialValueEntry.Text = string.Empty;
+    }
+	private void OnIcrementClicked(object sender, EventArgs e)
+	{
+		if(sender is Button button && button.BindingContext is CounterItem item)
+		{
+			item.Value++;
+			RefreshList();
+		}
+	}
+    private void OnDecrementClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.BindingContext is CounterItem item)
         {
-            // Toast is currently not working in MCT on Windows
-            if (OperatingSystem.IsWindows())
-                return;
-
-            var toast = Toast.Make(message, textSize: 18);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await toast.Show(cts.Token);
-        }
-
-        private void SfSegmentedControl_SelectionChanged(object sender, Syncfusion.Maui.Toolkit.SegmentedControl.SelectionChangedEventArgs e)
-        {
-            Application.Current!.UserAppTheme = e.NewIndex == 0 ? AppTheme.Light : AppTheme.Dark;
+            item.Value--;
+			RefreshList();
         }
     }
+	private void RefreshList()
+	{
+		CountersCollection.ItemsSource = null;
+		CountersCollection.ItemsSource = Counters;
+
+    }
+
 }

@@ -4,11 +4,14 @@
              x:Class="LicznikJS4f.CounterPage"
              Title="CounterPage">
     <VerticalStackLayout Spacing="15" Padding="20">
-        <Label Text="Add Counter and select his properties."
+        <Label Text="Add a counter and choose its starting value."
                Style="{StaticResource Headline}"
                HorizontalOptions="Center" Margin="25"/>
         <Entry x:Name="NewCounterEntry"
-               Placeholder="Enter name of new Counter."/>
+               Placeholder="Enter counter name."/>
+        <Entry x:Name="InitialValueEntry"
+               Placeholder="Starting value (default: 0)"
+               Keyboard="Numeric"/>
         <Button Text="Add Counter"
                 Clicked="Button_add_Counter"/>
         <CollectionView x:Name="CountersCollection">
@@ -16,12 +19,11 @@
                 <DataTemplate>
                     <HorizontalStackLayout>
                         <Label  
-                            Text="0"
-                            x:Name="{Binding name}"
+                            Text="{Binding Name}"
                             VerticalOptions="Center"
                             WidthRequest="120"/>
                         <Label
-                            Text="{Binding value}"
+                            Text="{Binding Value}"
                             VerticalOptions="Center"
                             WidthRequest="50"/>
                         <Button Text="+"
